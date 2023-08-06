@@ -167,6 +167,7 @@ public class NodeSelectorSlot extends AbstractLinkedProcessorSlot<Object> {
         }
 
         context.setCurNode(node);
+        // 由此触发下一个节点的entry方法
         fireEntry(context, resourceWrapper, node, count, prioritized, args);
     }
 

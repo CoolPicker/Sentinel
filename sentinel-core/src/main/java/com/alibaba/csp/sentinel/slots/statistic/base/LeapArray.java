@@ -40,10 +40,22 @@ import com.alibaba.csp.sentinel.util.TimeUtil;
  */
 public abstract class LeapArray<T> {
 
+    /**
+     * 一个用毫秒做单位的时间窗口的长度
+     */
     protected int windowLengthInMs;
+    /**
+     * 采样窗口的个数
+     */
     protected int sampleCount;
+    /**
+     * 一个用毫秒做单位的时间间隔
+     */
     protected int intervalInMs;
 
+    /**
+     * LeapArray 中创建了一个 AtomicReferenceArray 数组，用来对时间窗口中的统计值进行采样。通过采样的统计值再计算出平均值，就是我们需要的最终的实时指标的值了。
+     */
     protected final AtomicReferenceArray<WindowWrap<T>> array;
 
     /**
@@ -52,8 +64,9 @@ public abstract class LeapArray<T> {
     private final ReentrantLock updateLock = new ReentrantLock();
 
     /**
+     * LeapArray对象
      * The total bucket count is: {@code sampleCount = intervalInMs / windowLengthInMs}.
-     *
+     * StatisticNode 默认 ArrayMetric sampleCount = 60, intervalInMs = 60 * 1000
      * @param sampleCount  bucket count of the sliding window
      * @param intervalInMs the total time interval of this {@link LeapArray} in milliseconds
      */
@@ -116,8 +129,10 @@ public abstract class LeapArray<T> {
             return null;
         }
 
+        // 1.根据当前时间，算出该时间的timeId，并根据timeId算出当前窗口在采样窗口数组中的索引idx
         int idx = calculateTimeIdx(timeMillis);
         // Calculate current bucket start time.
+        // 2.根据当前时间算出当前窗口的应该对应的开始时间time，以毫秒为单位
         long windowStart = calculateWindowStart(timeMillis);
 
         /*
@@ -128,8 +143,11 @@ public abstract class LeapArray<T> {
          * (3) Bucket is deprecated, then reset current bucket and clean all deprecated buckets.
          */
         while (true) {
+            // 3.根据索引idx，在采样窗口数组中取得一个时间窗口old
             WindowWrap<T> old = array.get(idx);
+            // 4.循环判断直到获取到一个当前时间窗口
             if (old == null) {
+                // 4.1.如果old为空，则创建一个时间窗口，并将它插入到array的第idx个位置，array是一个 AtomicReferenceArray
                 /*
                  *     B0       B1      B2    NULL      B4
                  * ||_______|_______|_______|_______|_______||___
@@ -142,15 +160,20 @@ public abstract class LeapArray<T> {
                  * then try to update circular array via a CAS operation. Only one thread can
                  * succeed to update, while other threads yield its time slice.
                  */
+                // 如果没有获取到，则创建一个新的
                 WindowWrap<T> window = new WindowWrap<T>(windowLengthInMs, windowStart, newEmptyBucket(timeMillis));
+                // 通过CAS将新窗口设置到数组中去
                 if (array.compareAndSet(idx, null, window)) {
                     // Successfully updated, return the created bucket.
+                    // 如果能设置成功，则将该窗口返回
                     return window;
                 } else {
                     // Contention failed, the thread will yield its time slice to wait for bucket available.
+                    // 否则当前线程让出时间片，等待
                     Thread.yield();
                 }
             } else if (windowStart == old.windowStart()) {
+                // 4.2 如果当前窗口的开始时间time与old的开始时间相等，那么说明old就是当前时间窗口，直接返回old
                 /*
                  *     B0       B1      B2     B3      B4
                  * ||_______|_______|_______|_______|_______||___
@@ -164,6 +187,7 @@ public abstract class LeapArray<T> {
                  */
                 return old;
             } else if (windowStart > old.windowStart()) {
+                // 4.3.如果当前窗口的开始时间time大于old的开始时间，则说明old窗口已经过时了，将old的开始时间更新为最新值windowStart，下个循环中会在步骤4.2中返回，此时时间窗口向前滑动
                 /*
                  *   (old)
                  *             B0       B1      B2    NULL      B4
@@ -181,6 +205,7 @@ public abstract class LeapArray<T> {
                  * The update lock is conditional (tiny scope) and will take effect only when
                  * bucket is deprecated, so in most cases it won't lead to performance loss.
                  */
+                // 互斥锁，滑动时间窗口
                 if (updateLock.tryLock()) {
                     try {
                         // Successfully get the update lock, now we reset the bucket.
@@ -193,6 +218,7 @@ public abstract class LeapArray<T> {
                     Thread.yield();
                 }
             } else if (windowStart < old.windowStart()) {
+                // 4.4.如果当前窗口的开始时间time小于old的开始时间，实际上这种情况是不可能存在的，因为time是当前时间，old是过去的一个时间
                 // Should not go through here, as the provided time is already behind.
                 return new WindowWrap<T>(windowLengthInMs, windowStart, newEmptyBucket(timeMillis));
             }

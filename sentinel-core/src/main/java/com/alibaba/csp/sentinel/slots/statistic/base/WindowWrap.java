@@ -26,16 +26,19 @@ public class WindowWrap<T> {
 
     /**
      * Time length of a single window bucket in milliseconds.
+     * 时间窗口的开始时间，单位是毫秒
      */
     private final long windowLengthInMs;
 
     /**
      * Start timestamp of the window in milliseconds.
+     * 时间窗口的长度，单位是毫秒
      */
     private long windowStart;
 
     /**
-     * Statistic data.
+     * Statistic data.监控数据
+     * 时间窗口的内容，在 WindowWrap 中是用泛型表示这个值的，但实际上就是 Window 类
      */
     private T value;
 

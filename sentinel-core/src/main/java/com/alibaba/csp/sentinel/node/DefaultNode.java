@@ -138,7 +138,9 @@ public class DefaultNode extends StatisticNode {
 
     @Override
     public void addPassRequest(int count) {
+        // DefaultNode:保存着某个resource在某个context中的实时指标，每个DefaultNode都指向一个ClusterNode
         super.addPassRequest(count);
+        // ClusterNode:保存着某个resource在所有的context中实时指标的总和，同样的resource会共享同一个ClusterNode，不管他在哪个context中
         this.clusterNode.addPassRequest(count);
     }
 

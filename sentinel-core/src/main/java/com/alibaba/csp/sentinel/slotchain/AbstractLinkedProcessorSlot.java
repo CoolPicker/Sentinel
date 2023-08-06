@@ -18,6 +18,7 @@ package com.alibaba.csp.sentinel.slotchain;
 import com.alibaba.csp.sentinel.context.Context;
 
 /**
+ * AbstractLinkedProcessorSlot是一种责任链的设计，每个对象中都有一个next属性，指向的是另一个AbstractLinkedProcessorSlot对象。
  * @author qinan.qn
  * @author jialiang.linjl
  */
@@ -25,6 +26,17 @@ public abstract class AbstractLinkedProcessorSlot<T> implements ProcessorSlot<T>
 
     private AbstractLinkedProcessorSlot<?> next = null;
 
+    /**
+     * 从fireEntry方法中就开始传递执行entry了，这里会执行当前节点的下一个节点transformEntry方法，
+     * transformEntry方法会触发当前节点的entry，也就是说fireEntry方法实际是触发了下一个节点的entry方法。
+     * @param context         current {@link Context}
+     * @param resourceWrapper current resource
+     * @param obj             relevant object (e.g. Node)
+     * @param count           tokens needed
+     * @param prioritized     whether the entry is prioritized
+     * @param args            parameters of the original call
+     * @throws Throwable
+     */
     @Override
     public void fireEntry(Context context, ResourceWrapper resourceWrapper, Object obj, int count, boolean prioritized, Object... args)
         throws Throwable {

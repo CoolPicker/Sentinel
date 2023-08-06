@@ -21,7 +21,11 @@ import com.alibaba.csp.sentinel.slots.statistic.base.LongAdder;
 
 /**
  * Represents metrics data in a period of time span.
- *
+ * 底层流控统计
+ * LongAdder数组
+ * 时间窗口（Window） 是通过 LongAdder数组 来保存各种指标的值的
+ * LongAdder vs AtomicLong
+ * 主要是 LongAdder 在高并发下有更好的吞吐量，代价是花费了更多的空间，典型的以空间换时间。
  * @author jialiang.linjl
  * @author Eric Zhao
  */

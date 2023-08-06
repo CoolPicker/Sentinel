@@ -78,7 +78,7 @@ public class SphU {
 
     /**
      * Checking all {@link Rule}s about the resource.
-     *
+     * 申请一个entry，如果能够申请成功，则说明没有被限流，否则会抛出BlockException，表明已经被限流了。
      * @param name the unique name of the protected resource
      * @throws BlockException if the block criteria is met, eg. when any rule's threshold is exceeded.
      */

@@ -23,6 +23,10 @@ import com.alibaba.csp.sentinel.context.Context;
  */
 public class DefaultProcessorSlotChain extends ProcessorSlotChain {
 
+    /**
+     * 头节点
+     * 创建DefaultProcessorSlotChain对象时，首先创建了首节点，然后把首节点赋值给了尾节点
+     */
     AbstractLinkedProcessorSlot<?> first = new AbstractLinkedProcessorSlot<Object>() {
 
         @Override
@@ -37,6 +41,9 @@ public class DefaultProcessorSlotChain extends ProcessorSlotChain {
         }
 
     };
+    /**
+     * 尾节点
+     */
     AbstractLinkedProcessorSlot<?> end = first;
 
     @Override
@@ -69,6 +76,17 @@ public class DefaultProcessorSlotChain extends ProcessorSlotChain {
         return first.getNext();
     }
 
+    /**
+     * DefaultProcessorSlotChain的entry实际是执行的first属性的transformEntry方法。
+     * 而transformEntry方法会执行当前节点的entry方法，在DefaultProcessorSlotChain中first节点重写了entry方法。
+     * @param context         current {@link Context}
+     * @param resourceWrapper current resource
+     * @param t           generics parameter, usually is a {@link com.alibaba.csp.sentinel.node.Node}
+     * @param count           tokens needed
+     * @param prioritized     whether the entry is prioritized
+     * @param args            parameters of the original call
+     * @throws Throwable e
+     */
     @Override
     public void entry(Context context, ResourceWrapper resourceWrapper, Object t, int count, boolean prioritized, Object... args)
         throws Throwable {

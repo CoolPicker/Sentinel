@@ -217,6 +217,7 @@ public class ArrayMetric implements Metric {
 
     @Override
     public void addPass(int count) {
+        // 获取当前时间窗口
         WindowWrap<MetricBucket> wrap = data.currentWindow();
         wrap.value().addPass(count);
     }

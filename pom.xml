@@ -71,7 +71,6 @@
         <module>sentinel-extension</module>
         <module>sentinel-transport</module>
         <module>sentinel-adapter</module>
-        <module>sentinel-dashboard</module>
 
         <module>sentinel-demo</module>
         <module>sentinel-benchmark</module>

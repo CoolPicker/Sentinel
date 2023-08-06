@@ -116,6 +116,8 @@ public class CtSph implements Sph {
 
     private Entry entryWithPriority(ResourceWrapper resourceWrapper, int count, boolean prioritized, Object... args)
         throws BlockException {
+        // 1.对参数和全局配置项做检测，
+        // 如果不符合要求就直接返回了一个CtEntry对象，不会再进行后面的限流检测，否则进入下面的检测流程。
         Context context = ContextUtil.getContext();
         if (context instanceof NullContext) {
             // The {@link NullContext} indicates that the amount of context has exceeded the threshold,
@@ -128,14 +130,16 @@ public class CtSph implements Sph {
             context = MyContextUtil.myEnter(Constants.CONTEXT_DEFAULT_NAME, "", resourceWrapper.getType());
         }
 
-        // Global switch is close, no rule checking will do.
+        // Global switch is close, no rule checking will do. 全局sentinel流控开关
         if (!Constants.ON) {
             return new CtEntry(resourceWrapper, null, context);
         }
 
+        // 2. 根据包装过的资源对象获取对应的SlotChain
+        // 获取该资源对应的SlotChain
         ProcessorSlot<Object> chain = lookProcessChain(resourceWrapper);
 
-        /*
+        /**
          * Means amount of resources (slot chain) exceeds {@link Constants.MAX_SLOT_CHAIN_SIZE},
          * so no rule checking will be done.
          */
@@ -143,11 +147,20 @@ public class CtSph implements Sph {
             return new CtEntry(resourceWrapper, null, context);
         }
 
+        // 3.执行SlotChain的entry方法
+        //  3.1.如果SlotChain的entry方法抛出了BlockException，则将该异常继续向上抛出
+        //  3.2.如果SlotChain的entry方法正常执行了，则最后会将该entry对象返回
         Entry e = new CtEntry(resourceWrapper, chain, context);
         try {
+            // 执行Slot的entry方法
+            // 每个Slot执行完业务逻辑处理后，调用了fireEntry()方法，由此触发了下一个节点的entry方法。
+            // 此时我们就知道了sentinel的责任链就是这样传递的：每个Slot节点执行完自己的业务后，会调用fireEntry来触发下一个节点的entry方法。
+            // 至此就通过SlotChain完成了对每个节点的entry()方法的调用，每个节点会根据创建的规则，进行自己的逻辑处理，当统计的结果达到设置的阈值时，就会触发限流、降级等事件，具体是抛出BlockException异常。
             chain.entry(context, resourceWrapper, null, count, prioritized, args);
         } catch (BlockException e1) {
             e.exit(count, args);
+            // 抛出BlockException
+            // 4.如果上层方法捕获了BlockException，则说明请求被限流了，否则请求能正常执行
             throw e1;
         } catch (Throwable e1) {
             // This should not happen, unless there are errors existing in Sentinel internal.
@@ -192,7 +205,9 @@ public class CtSph implements Sph {
      * @return {@link ProcessorSlotChain} of the resource
      */
     ProcessorSlot<Object> lookProcessChain(ResourceWrapper resourceWrapper) {
+        // HashMap 缓存，chainMap
         ProcessorSlotChain chain = chainMap.get(resourceWrapper);
+        // 加锁 - double check，
         if (chain == null) {
             synchronized (LOCK) {
                 chain = chainMap.get(resourceWrapper);
@@ -202,6 +217,7 @@ public class CtSph implements Sph {
                         return null;
                     }
 
+                    // 具体构造chain的方法
                     chain = SlotChainProvider.newSlotChain();
                     Map<ResourceWrapper, ProcessorSlotChain> newMap = new HashMap<ResourceWrapper, ProcessorSlotChain>(
                         chainMap.size() + 1);

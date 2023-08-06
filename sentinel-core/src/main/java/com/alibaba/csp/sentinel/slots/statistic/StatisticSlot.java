@@ -52,9 +52,14 @@ public class StatisticSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
     public void entry(Context context, ResourceWrapper resourceWrapper, DefaultNode node, int count,
                       boolean prioritized, Object... args) throws Throwable {
         try {
+            // 1.通过node中的当前的实时统计指标信息进行规则校验
             // Do some checking.
+            // 触发下一个Slot的entry方法
             fireEntry(context, resourceWrapper, node, count, prioritized, args);
+            // 如果能通过SlotChain中后面的Slot的entry方法，说明没有被限流或降级
 
+            // 2.如果通过了校验，则重新更新node中的实时指标数据
+            // 统计信息
             // Request passed, add thread count and pass count.
             node.increaseThreadNum();
             node.addPassRequest(count);
@@ -94,6 +99,7 @@ public class StatisticSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
             // Blocked, set block exception to current entry.
             context.getCurEntry().setError(e);
 
+            // 3.如果被block或出现了异常了，则重新更新node中block的指标或异常指标
             // Add block count.
             node.increaseBlockQps(count);
             if (context.getCurEntry().getOriginNode() != null) {
@@ -115,6 +121,7 @@ public class StatisticSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
             // Unexpected error, set error to current entry.
             context.getCurEntry().setError(e);
 
+            // 3.如果被block或出现了异常了，则重新更新node中block的指标或异常指标
             // This should not happen.
             node.increaseExceptionQps(count);
             if (context.getCurEntry().getOriginNode() != null) {

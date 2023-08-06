@@ -236,6 +236,10 @@ public class StatisticNode implements Node {
         return curThreadNum.get();
     }
 
+    /**
+     * 统计通过请求数
+     * @param count count to add pass
+     */
     @Override
     public void addPassRequest(int count) {
         rollingCounterInSecond.addPass(count);
