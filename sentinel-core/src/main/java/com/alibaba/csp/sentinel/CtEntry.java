@@ -24,6 +24,9 @@ import com.alibaba.csp.sentinel.slotchain.ResourceWrapper;
 
 /**
  * Linked entry within current context.
+ * 当在一个上下文中多次调用了 SphU.entry() 方法时，就会创建一个调用树，这个树的节点之间是通过parent和child关系维持的。
+ * 需要注意的是：parent和child是在 CtSph 类的一个私有内部类 CtEntry 中定义的，CtEntry 是 Entry 的一个子类。
+ * 由于context中总是保存着调用链树中的当前入口，所以当当前entry执行exit退出时，需要将parent设置为当前入口。
  *
  * @author jialiang.linjl
  * @author Eric Zhao

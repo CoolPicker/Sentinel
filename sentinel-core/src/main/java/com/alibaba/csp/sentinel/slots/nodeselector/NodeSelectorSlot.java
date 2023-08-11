@@ -126,6 +126,16 @@ public class NodeSelectorSlot extends AbstractLinkedProcessorSlot<Object> {
 
     /**
      * {@link DefaultNode}s of the same resource in different context.
+     * key是用的contextName，而不是resourceName，这是为什么呢？
+     * 如果用resourceName来做map的key，那对于同一个资源resourceA来说，
+     * 在context1中获取到的defaultNodeA和在context2中获取到的defaultNodeA是同一个，
+     * 那么怎么在这两个context中对defaultNodeA进行更改呢，修改了一个必定会对另一个产生影响。
+     * 而如果用contextName来作为key，那对于同一个资源resourceA来说，
+     * 在context1中获取到的是defaultNodeA1，在context2中获取到是defaultNodeA2，
+     * 那在不同的context中对同一个资源可以使用不同的DefaultNode进行分别统计和计算，
+     * 最后再通过ClusterNode进行合并就可以了。
+     * 同一个context中对同一个resource进行多次entry()调用时，会形式一颗调用树，
+     * 这个树是通过CtEntry之间的parent/child关系维护的。
      */
     private volatile Map<String, DefaultNode> map = new HashMap<String, DefaultNode>(10);
 

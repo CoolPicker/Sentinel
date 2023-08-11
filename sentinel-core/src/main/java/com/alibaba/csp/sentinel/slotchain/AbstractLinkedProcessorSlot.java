@@ -35,7 +35,7 @@ public abstract class AbstractLinkedProcessorSlot<T> implements ProcessorSlot<T>
      * @param count           tokens needed
      * @param prioritized     whether the entry is prioritized
      * @param args            parameters of the original call
-     * @throws Throwable
+     * @throws Throwable e
      */
     @Override
     public void fireEntry(Context context, ResourceWrapper resourceWrapper, Object obj, int count, boolean prioritized, Object... args)

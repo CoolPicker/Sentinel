@@ -47,6 +47,15 @@ import com.alibaba.csp.sentinel.slots.nodeselector.NodeSelectorSlot;
  * <p>
  * Same resource in different context will count separately, see {@link NodeSelectorSlot}.
  * </p>
+ * Context维护着当前调用链的元数据。
+ * 元数据有哪些：
+ *  entranceNode：当前调用链的入口节点
+ *  curEntry：当前调用链的当前entry
+ *  node：与当前entry所对应的curNode
+ *  origin：当前调用链的调用源
+ * context是保存在ThreadLocal中的，每次执行的时候会优先到ThreadLocal中获取。如果context为null时才会再次去创建一个context。
+ * 那什么时候context会被置为null并从ThreadLocal中清空呢？
+ * 当Entry执行exit方法时，当当前entry的parent为null时，也就说明当前entry是最上层的节点了，此时要把保存在ThreadLocal中的context也清空掉。
  *
  * @author jialiang.linjl
  * @author leyou(lihao)

@@ -23,6 +23,11 @@ import com.alibaba.csp.sentinel.slots.statistic.metric.DebugSupport;
 
 /**
  * Holds real-time statistics for resources.
+ * Node 中保存了资源的实时统计数据，例如：passQps，blockQps，rt等实时数据。
+ * 正是有了这些统计数据后， Sentinel 才能进行限流、降级等一系列的操作。
+ * node是一个接口，他有一个实现类：StatisticNode，
+ * 但是StatisticNode本身也有两个子类，一个是DefaultNode，另一个是ClusterNode，
+ * DefaultNode又有一个子类叫EntranceNode。entranceNode是每个上下文的入口
  *
  * @author qinan.qn
  * @author leyou

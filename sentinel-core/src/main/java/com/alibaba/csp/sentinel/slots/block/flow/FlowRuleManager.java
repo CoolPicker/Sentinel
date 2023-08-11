@@ -91,7 +91,7 @@ public class FlowRuleManager {
 
     /**
      * Load {@link FlowRule}s, former rules will be replaced.
-     *
+     * 修改流控规则
      * @param rules new rules to load.
      */
     public static void loadRules(List<FlowRule> rules) {

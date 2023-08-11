@@ -81,6 +81,7 @@ public class ContextUtil {
     }
 
     /**
+     * 创建Context。
      * <p>
      * Enter the invocation context, which marks as the entrance of an invocation chain.
      * The context is wrapped with {@code ThreadLocal}, meaning that each thread has it's own {@link Context}.

@@ -115,7 +115,7 @@ public class SystemRuleManager {
 
     /**
      * Load {@link SystemRule}s, former rules will be replaced.
-     *
+     * 修改系统规则
      * @param rules new rules to load.
      */
     public static void loadRules(List<SystemRule> rules) {

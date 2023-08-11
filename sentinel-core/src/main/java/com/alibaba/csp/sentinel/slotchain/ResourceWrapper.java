@@ -19,6 +19,9 @@ import com.alibaba.csp.sentinel.EntryType;
 
 /**
  * A wrapper of resource name and {@link EntryType}.
+ * 实现类：
+ *  StringResourceWrapper - 对一串字符串进行包装，是一个通用的资源包装类
+ *  MethodResourceWrapper - 对方法调用的包装。
  *
  * @author qinan.qn
  * @author jialiang.linjl

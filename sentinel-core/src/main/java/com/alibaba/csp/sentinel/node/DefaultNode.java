@@ -34,6 +34,8 @@ import com.alibaba.csp.sentinel.slots.nodeselector.NodeSelectorSlot;
  * This class may have a list of sub {@link DefaultNode}s. Child nodes will be created when
  * calling {@link SphU}#entry() or {@link SphO}@entry() multiple times in the same {@link Context}.
  * </p>
+ * defaultNode是记录当前调用的实时数据的，每个defaultNode都关联着一个资源和clusterNode，
+ * 有着相同资源的defaultNode，他们关联着同一个clusterNode。
  *
  * @author qinan.qn
  * @see NodeSelectorSlot

@@ -28,6 +28,7 @@ import com.alibaba.csp.sentinel.slots.statistic.metric.occupy.OccupiableBucketLe
 
 /**
  * The basic metric class in Sentinel using a {@link BucketLeapArray} internal.
+ * Metric有一个实现类：ArrayMetric，在ArrayMetric中主要是通过一个叫LeapArray的对象进行窗口统计的。
  *
  * @author jialiang.linjl
  * @author Eric Zhao
